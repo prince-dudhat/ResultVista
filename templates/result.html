@@ -1,0 +1,888 @@
+{% extends "base.html" %}
+
+{% block title %}
+Process Results - ResultVista
+{% endblock %}
+
+{% block head %}
+<style>
+    :root {
+        --primary-blue: #2C3E50;
+        --secondary-blue: #3498DB;
+        --accent-teal: #1ABC9C;
+        --light-gray: #F8F9FA;
+        --dark-gray: #6C757D;
+        --success-green: #27AE60;
+        --danger-red: #E74C3C;
+    }
+
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        background-attachment: fixed;
+    }
+
+    /* Main Container */
+    .results-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        min-height: 80vh;
+        margin: 20px auto;
+        width: 95%;
+    }
+
+    /* Navbar */
+    .navbar {
+        padding: 15px 40px;
+        background-color: var(--primary-blue);
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: black;
+    }
+
+    /* Header Section */
+    .results-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        padding: 30px 40px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .stat-badge {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Control Panel */
+    .control-panel {
+        background: var(--light-gray);
+        padding: 25px 40px;
+        border-bottom: 1px solid #E3E6E8;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .control-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    /* Sort Dropdown */
+    .sort-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .sort-btn {
+        background: white;
+        color: var(--primary-blue);
+        border: 2px solid var(--secondary-blue);
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .sort-btn:hover {
+        background: var(--secondary-blue);
+        color: white;
+    }
+
+    .sort-options {
+        display: none;
+        position: absolute;
+        background: white;
+        min-width: 200px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        z-index: 101;
+        right: 0;
+        margin-top: 5px;
+    }
+
+    .sort-options.show {
+        display: block;
+    }
+
+    .sort-option {
+        padding: 12px 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.2s;
+    }
+
+    .sort-option:hover {
+        background: rgba(52, 152, 219, 0.1);
+    }
+
+    .sort-option:last-child {
+        border-bottom: none;
+    }
+
+    /* Results Table */
+    .results-content {
+        padding: 20px 40px 40px;
+    }
+
+    .results-table-container {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+    }
+
+    .results-table th {
+        background: var(--primary-blue);
+        color: white;
+        padding: 18px 15px;
+        text-align: left;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        white-space: nowrap;
+    }
+
+    .results-table td {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .results-table tr:hover {
+        background: rgba(52, 152, 219, 0.05);
+    }
+
+    .results-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .clickable-row {
+        transition: all 0.2s;
+    }
+
+    .clickable-row:hover {
+        background-color: rgba(52, 152, 219, 0.1) !important;
+        transform: translateY(-1px);
+        box-shadow: inset 0 0 0 1px rgba(52, 152, 219, 0.2);
+        cursor: pointer;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-pass {
+        background: rgba(39, 174, 96, 0.1);
+        color: var(--success-green);
+        border: 1px solid rgba(39, 174, 96, 0.2);
+    }
+
+    .status-fail {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-red);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+    }
+
+    /* Grade Badges */
+    .grade-badge {
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        min-width: 45px;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .grade-A {
+        background: #1ABC9C;
+        color: white;
+    }
+
+    .grade-B {
+        background: #3498DB;
+        color: white;
+    }
+
+    .grade-C {
+        background: #F39C12;
+        color: white;
+    }
+
+    .grade-D {
+        background: #E74C3C;
+        color: white;
+    }
+
+    .grade-F {
+        background: #7F8C8D;
+        color: white;
+    }
+
+    /* Action Buttons */
+    .btn-back {
+        background: rgba(255, 255, 255, 0.701);
+        color: var(--primary-blue);
+        border: 3px solid var(--primary-blue);
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    .btn-back:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-primary {
+        background: var(--secondary-blue);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary:hover {
+        background: #2980b9;
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: var(--accent-teal);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-success:hover {
+        background: #16a085;
+        box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline {
+        background: white;
+        color: var(--primary-blue);
+        border: 2px solid var(--primary-blue);
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .btn-outline:hover {
+        background: var(--primary-blue);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Search Bar */
+    .search-container {
+        position: relative;
+        flex-grow: 1;
+        max-width: 400px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 20px 12px 45px;
+        border: 2px solid #E3E6E8;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        background: white;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--dark-gray);
+    }
+
+    /* Loader */
+    .loader {
+        display: none;
+        text-align: center;
+        padding: 40px;
+    }
+
+    .loader.show {
+        display: block;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--secondary-blue);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .results-container {
+            width: 98%;
+            margin: 10px auto;
+        }
+
+        .results-header,
+        .control-panel,
+        .results-content {
+            padding: 20px;
+        }
+
+        .header-stats {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-buttons {
+            flex-direction: column;
+        }
+
+        .search-container {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .navbar {
+            padding: 10px 15px;
+        }
+
+        .btn-primary,
+        .btn-success,
+        .btn-outline {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+        }
+
+        .sort-options {
+            left: 0;
+            right: auto;
+            min-width: 180px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .results-table {
+            font-size: 0.85rem;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 10px 8px;
+        }
+
+        .status-badge,
+        .grade-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="results-container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <!-- Logo on left -->
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}"
+                style="display: flex; align-items: center; gap: 10px;">
+                <img src="{{ url_for('static', filename='logo - Copy.png') }}" width="50px" height="50px" class="me-2"
+                    alt="Logo">
+                <img src="{{ url_for('static', filename='font_logo - Copy.png') }}" alt="ResultVista" height="20px"
+                    class="d-none d-md-block">
+            </a>
+
+            <!-- Right side - User Profile Dropdown -->
+            <div class="dropdown">
+                <button class="btn dropdown-toggle d-flex align-items-center" type="button" id="userDropdown"
+                    data-bs-toggle="dropdown"
+                    style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; padding: 8px 15px;">
+
+                    {% if user.picture != "default_profile" %}
+                    <img src="{{ user.picture }}" alt="Profile"
+                        style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='default.jpg') }}" alt="Profile"
+                        style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
+                    {% endif %}
+
+                    <span class="d-none d-md-block" style="font-weight: 600;">{{ user.name }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end"
+                    style="border-radius: 10px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 10px; min-width: 250px;">
+                    <li>
+                        <div class="dropdown-header" style="padding: 15px;">
+                            <h6 style="font-weight: 700; color: var(--primary-blue);">{{ user.name }}</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.85rem;">{{ user.email }}</p>
+                        </div>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('dashboard') }}"
+                            style="padding: 10px 15px; border-radius: 5px;">
+                            <i class="bi bi-speedometer2 me-2" style="color: var(--secondary-blue);"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('logout') }}"
+                            style="padding: 10px 15px; border-radius: 5px; color: var(--danger-red);">
+                            <i class="bi bi-box-arrow-right me-2"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="results-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <h2 class="fw-bold mb-2">Results Analysis</h2>
+                <p class="mb-0 opacity-75">Detailed analysis of student performance</p>
+            </div>
+            <div>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-back">
+                    <i class="bi bi-arrow-left"></i>
+                    <b>Back to Dashboard</b>
+                </a>
+            </div>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-badge">
+                <i class="bi bi-people"></i>
+                <span>Total Students: <strong>{{ summary.total_students }}</strong></span>
+            </div>
+            <div class="stat-badge">
+                <i class="bi bi-check-circle"></i>
+                <span>Pass: <strong style="color: rgb(36, 185, 96)">{{ summary.pass_count }}</strong></span>
+            </div>
+            <div class="stat-badge">
+                <i class="bi bi-x-circle"></i>
+                <span>Fail: <strong class="text-danger">{{ summary.fail_count }}</strong></span>
+            </div>
+            <div class="stat-badge">
+                <i class="bi bi-graph-up"></i>
+                <span>Max Total: <strong>{{ summary.max_total }}</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="control-buttons">
+                <a href="{{ url_for('show_charts') }}" class="btn btn-primary" id="generateGraphBtn">
+                    <i class="bi bi-bar-chart-fill"></i>
+                    View Charts
+                </a>
+                <button class="btn btn-success" id="downloadExcelBtn">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Download Excel
+                </button>
+            </div>
+
+            <div class="d-flex gap-3 align-items-center">
+                <!-- Search -->
+                <div class="search-container">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Search students...">
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="sort-dropdown">
+                    <button class="sort-btn" id="sortBtn">
+                        <i class="bi bi-sort-down"></i>
+                        Sort By
+                    </button>
+                    <div class="sort-options" id="sortOptions">
+                        <div class="sort-option" data-sort="total-desc">
+                            <i class="bi bi-sort-numeric-up"></i>
+                            Total (High to Low)
+                        </div>
+                        <div class="sort-option" data-sort="total-asc">
+                            <i class="bi bi-sort-numeric-down"></i>
+                            Total (Low to High)
+                        </div>
+                        <div class="sort-option" data-sort="name-asc">
+                            <i class="bi bi-sort-alpha-down"></i>
+                            Name (A to Z)
+                        </div>
+                        <div class="sort-option" data-sort="name-desc">
+                            <i class="bi bi-sort-alpha-up"></i>
+                            Name (Z to A)
+                        </div>
+                        <div class="sort-option" data-sort="enrollment-desc">
+                            <i class="bi bi-sort-numeric-up"></i>
+                            Enrollment (High to Low)
+                        </div>
+                        <div class="sort-option" data-sort="enrollment-asc">
+                            <i class="bi bi-sort-numeric-down"></i>
+                            Enrollment (Low to High)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="results-content">
+        <!-- Table Info -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="text-muted">Showing {{ results|length }} students</span>
+            </div>
+            <div>
+                <span class="text-muted">Max Marks per Subject: <strong>{{ max_marks }}</strong></span>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div class="loader" id="tableLoader">
+            <div class="spinner"></div>
+            <p>Loading results...</p>
+        </div>
+
+        <!-- Results Table -->
+        <div class="results-table-container">
+            <table class="results-table" id="resultsTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Enrollment No</th>
+                        <th>Name</th>
+                        {% for subject in subjects %}
+                        <th>{{ subject|capitalize }}</th>
+                        {% endfor %}
+                        <th>Total</th>
+                        <th>Percentage</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in results %}
+                    <tr data-enrollment="{{ student.enrollment_no }}" class="clickable-row">
+                        <td>{{ student.rank }}</td>
+                        <td>{{ student.enrollment_no }}</td>
+                        <td><strong>{{ student.name|upper }}</strong></td>
+                        {% for subject in subjects %}
+                        <td>{{ student.subjects[subject] }}</td>
+                        {% endfor %}
+                        <td><strong>{{ student.total }}</strong></td>
+                        <td>{{ student.percentage }}%</td>
+                        <td>
+                            <span class="grade-badge grade-{{ student.grade }}">
+                                {{ student.grade }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ student.status|lower }}">
+                                {{ student.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Get subjects length from Flask context
+    const subjectsLength = parseInt("{{ subjects|length }}");
+    let currentSortType = '{{ current_sort|default("total-desc") }}';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Elements
+        const sortBtn = document.getElementById('sortBtn');
+        const sortOptions = document.getElementById('sortOptions');
+        const searchInput = document.getElementById('searchInput');
+        const resultsTable = document.getElementById('resultsTable');
+        const tableBody = resultsTable.querySelector('tbody');
+        const rows = Array.from(tableBody.querySelectorAll('tr'));
+        const tableLoader = document.getElementById('tableLoader');
+        const generateGraphBtn = document.getElementById('generateGraphBtn');
+        const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+
+        // Initial show table, hide loader
+        tableLoader.classList.remove('show');
+
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', function () {
+                const enrollment = this.getAttribute('data-enrollment');
+                // Direct URL construction
+                window.location.href = `/student/${enrollment}`;
+            });
+        });
+
+        // Sort Dropdown Toggle
+        sortBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            sortOptions.classList.toggle('show');
+        });
+
+        // Close sort dropdown when clicking outside
+        document.addEventListener('click', function () {
+            sortOptions.classList.remove('show');
+        });
+
+        // Sort functionality
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', function () {
+                const sortType = this.getAttribute('data-sort');
+                sortTable(sortType);
+                sortOptions.classList.remove('show');
+                sortBtn.innerHTML = `<i class="bi bi-sort-down"></i> ${this.textContent.trim()}`;
+            });
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Sort function
+        function sortTable(sortType) {
+            tableLoader.classList.add('show');
+
+            setTimeout(() => {
+                const sortedRows = rows.sort((a, b) => {
+                    const cellsA = a.querySelectorAll('td');
+                    const cellsB = b.querySelectorAll('td');
+
+                    // Calculate indices based on subjects length
+                    const totalIndex = 3 + subjectsLength; // 3 basic columns + subjects
+                    const percentageIndex = 4 + subjectsLength; // percentage comes after total
+                    const statusIndex = 6 + subjectsLength; // status comes after grade
+
+                    switch (sortType) {
+                        case 'total-desc':
+                            return parseFloat(cellsB[totalIndex].textContent) -
+                                parseFloat(cellsA[totalIndex].textContent);
+
+                        case 'total-asc':
+                            return parseFloat(cellsA[totalIndex].textContent) -
+                                parseFloat(cellsB[totalIndex].textContent);
+
+                        case 'name-asc':
+                            return cellsA[2].textContent.localeCompare(cellsB[2].textContent);
+
+                        case 'name-desc':
+                            return cellsB[2].textContent.localeCompare(cellsA[2].textContent);
+
+                        case 'enrollment-asc':
+                            return parseFloat(cellsA[1].textContent) -
+                                parseFloat(cellsB[1].textContent);
+
+                        case 'enrollment-desc':
+                            return parseFloat(cellsB[1].textContent) -
+                                parseFloat(cellsA[1].textContent);
+
+                        default:
+                            return 0;
+                    }
+                });
+
+                // Reorder rows in table
+                sortedRows.forEach(row => tableBody.appendChild(row));
+                tableLoader.classList.remove('show');
+            }, 300);
+        }
+
+        // Download Excel Button
+        downloadExcelBtn.addEventListener('click', function () {
+            tableLoader.classList.add('show');
+
+            setTimeout(() => {
+                try {
+                    // Get the current table (with sorting/filtering applied)
+                    const table = document.getElementById('resultsTable');
+
+                    // Clone table to avoid modifying the original
+                    const tableClone = table.cloneNode(true);
+
+                    // Process percentage columns to convert "64.29%" to number 64.29
+                    const allRows = tableClone.querySelectorAll('tr');
+
+                    allRows.forEach(row => {
+                        const cells = row.querySelectorAll('th, td');
+                        cells.forEach((cell, index) => {
+                            const text = cell.textContent.trim();
+                            // Check if this is likely a percentage cell
+                            // You might need to adjust this condition
+                            if (text.endsWith('%')) {
+                                // Convert "64.29%" to 64.29
+                                const num = parseFloat(text);
+                                cell.textContent = num;
+                            }
+                        });
+                    });
+
+                    // Create workbook with just the results sheet
+                    const workbook = XLSX.utils.book_new();
+                    const worksheet = XLSX.utils.table_to_sheet(tableClone, { raw: true });
+
+                    // FORCE Enrollment No column to TEXT
+                    const range = XLSX.utils.decode_range(worksheet['!ref']);
+
+                    for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: R, c: 2 }); // column 1 = Enrollment No
+                        if (worksheet[cellAddress]) {
+                            worksheet[cellAddress].t = 's';           // string type
+                            worksheet[cellAddress].v = String(worksheet[cellAddress].v);
+                        }
+                    }
+
+                    // Calculate column widths based on header + cell content
+                    const colWidths = [];
+                    const rows = tableClone.querySelectorAll('tr');
+
+                    // Determine number of columns from header
+                    const colCount = tableClone.querySelectorAll('thead th').length;
+
+                    for (let col = 0; col < colCount; col++) {
+                        let maxLength = 8; // minimum width
+
+                        rows.forEach(row => {
+                            const cells = row.querySelectorAll('th, td');
+                            if (cells[col]) {
+                                const text = cells[col].textContent.trim();
+                                maxLength = Math.max(maxLength, text.length);
+                            }
+                        });
+
+                        colWidths.push({ wch: maxLength + 2 }); // padding
+                    }
+
+                    worksheet['!cols'] = colWidths;
+
+                    // Add worksheet to workbook
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+
+                    // Generate filename with timestamp
+                    const filename = `result.xlsx`;
+
+                    // Download the file
+                    XLSX.writeFile(workbook, filename);
+                } catch (error) {
+                    console.error('Error generating Excel:', error);
+                } finally {
+                    tableLoader.classList.remove('show');
+                }
+
+            }, 500);
+        });
+    });
+</script>
+{% endblock %}

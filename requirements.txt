@@ -1,0 +1,13 @@
+Flask
+Flask-Bcrypt
+Flask-Mail
+Flask-Session
+Flask-SQLAlchemy
+Authlib
+python-dotenv
+pandas
+openpyxl
+reportlab
+matplotlib
+pymysql
+Werkzeug

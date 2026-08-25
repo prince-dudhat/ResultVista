@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}
+ResultVista- Analyze Results in Minutes
+{% endblock %}
+
+{% block head %}
+<style>
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+    }
+
+    .feature-card {
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+
+    .cta-buttons .btn {
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        margin: 5px;
+    }
+</style>
+{% endblock %}
+
+
+{% block body %}
+<!-- Navbar -->
+<nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='logo.png') }}" width="50px" height="50px" class="me-2" alt="Logo">
+            <img src="{{ url_for('static', filename='font_logo.png') }}" alt="ResultVista" height="20px">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse " id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="btn btn-outline-primary me-2" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary" href="/register">Sign Up</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            Analyze Student Results in <span class="text-warning">Minutes</span>
+        </h1>
+        <p class="lead mb-5">
+            Upload Excel sheets, get instant insights, and make data-driven decisions.
+            Used by 50+ educational institutions.
+        </p>
+        <div class="cta-buttons">
+            <a href="/login" class="btn btn-light btn-lg">
+                Started Free
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Preview -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Everything You Need for Result Analysis</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-sm-12">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-chart-bar fa-3x text-primary"></i>
+                        </div>
+                        <h4>Smart Analytics</h4>
+                        <p>Automated <strong>grade calculation</strong>, <strong>pass/fail analysis</strong>, and
+                            <strong>performance trends</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-chart-bar fa-3x text-primary"></i>
+                        </div>
+                        <h4>Structured Excel Processing</h4>
+                        <p>Upload Excel files in the <strong>specified format</strong> for seamless processing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer CTA -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Transform Your Result Analysis?</h2>
+        <a href="/login" class="btn btn-primary btn-lg px-5">
+            Start Analyzing Now
+        </a>
+    </div>
+</section>
+{% endblock %}

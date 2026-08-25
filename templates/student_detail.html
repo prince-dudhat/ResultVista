@@ -1,0 +1,591 @@
+{% extends "base.html" %}
+
+{% block title %}
+Student Details - ResultVista
+{% endblock %}
+
+{% block head %}
+<style>
+    :root {
+        --primary-blue: #2C3E50;
+        --secondary-blue: #3498DB;
+        --accent-teal: #1ABC9C;
+        --light-gray: #F8F9FA;
+        --dark-gray: #6C757D;
+        --success-green: #21c766;
+        --danger-red: #E74C3C;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        background-attachment: fixed;
+    }
+
+    .student-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        margin: 20px auto;
+        width: 95%;
+    }
+
+    /* Navbar */
+    .navbar {
+        padding: 15px 40px;
+        background-color: var(--primary-blue);
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: black;
+    }
+
+    /* Student Header */
+    .student-header {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+        color: white;
+        padding: 40px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .student-basic-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 15px;
+        text-align: center;
+        min-width: 125px;
+        flex: 1;
+    }
+
+    .info-card h5 {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 10px;
+    }
+
+    .info-card .value {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    /* Main Content */
+    .student-content {
+        padding: 40px;
+    }
+
+    /* Result Table */
+    .result-table {
+        background: var(--light-gray);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 40px;
+    }
+
+    .result-table h4 {
+        color: var(--primary-blue);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--secondary-blue);
+    }
+
+    .marks-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .marks-table th {
+        background: var(--primary-blue);
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .marks-table td {
+        padding: 15px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .marks-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .marks-table tr:hover {
+        background: rgba(52, 152, 219, 0.05);
+    }
+
+    .highlight-row {
+        background: rgba(52, 152, 219, 0.1);
+        font-weight: 700;
+    }
+
+    /* Status Badges */
+    .grade-badge {
+        width: 50px;
+        height: 50px;
+        padding: 15px 15px;
+        border-radius: 50%;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+
+    }
+
+    .grade-A {
+        background: var(--success-green);
+    }
+
+    .grade-B {
+        background: var(--secondary-blue);
+    }
+
+    .grade-C {
+        background: #F39C12;
+    }
+
+    .grade-D {
+        background: #E74C3C;
+    }
+
+    .grade-F {
+        background: var(--dark-gray);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-PASS {
+        color: var(--success-green);
+    }
+
+    .status-FAIL {
+        color: var(--danger-red);
+    }
+
+    /* Chart Section */
+    .chart-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 40px;
+        box-shadow: 0px 0px 10px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .chart-container {
+        height: 400px;
+        margin-top: 20px;
+    }
+
+    /* Email Form */
+    .email-form {
+        background: var(--light-gray);
+        border-radius: 15px;
+        padding: 25px;
+    }
+
+    .form-control {
+        border: 2px solid #E3E6E8;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .btn-back-top {
+        background: rgba(255, 255, 255, 0.701);
+        color: var(--primary-blue);
+        border: 3px solid var(--primary-blue);
+        padding: 10px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-family: Inter;
+    }
+
+    .btn-back-top:hover {
+        background: var(--primary-blue);
+        color: white;
+    }
+
+    .btn-send {
+        background: var(--accent-teal);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-send:hover {
+        background: #16a085;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+        color: white
+    }
+
+    .btn-back {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-back:hover {
+        background: #1a252f;
+        transform: translateY(-2px);
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .student-container {
+            width: 98%;
+            margin: 10px auto;
+        }
+
+        .student-header,
+        .student-content {
+            padding: 20px;
+        }
+
+        .info-card {
+            width: 100%;
+        }
+
+        .marks-table {
+            font-size: 0.9rem;
+        }
+
+        .marks-table th,
+        .marks-table td {
+            padding: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="student-container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <!-- Logo on left -->
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}"
+                style="display: flex; align-items: center; gap: 10px;">
+                <img src="{{ url_for('static', filename='logo - Copy.png') }}" width="50px" height="50px" class="me-2"
+                    alt="Logo">
+                <img src="{{ url_for('static', filename='font_logo - Copy.png') }}" alt="ResultVista" height="20px"
+                    class="d-none d-md-block">
+            </a>
+
+            <!-- Right side - User Profile Dropdown -->
+            <div class="dropdown">
+                <button class="btn dropdown-toggle d-flex align-items-center" type="button" id="userDropdown"
+                    data-bs-toggle="dropdown"
+                    style="background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; padding: 8px 15px;">
+
+                    {% if user.picture != "default_profile" %}
+                    <img src="{{ user.picture }}" alt="Profile"
+                        style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='default.jpg') }}" alt="Profile"
+                        style="width: 32px; height: 32px; border-radius: 50%; margin-right: 10px;">
+                    {% endif %}
+
+                    <span class="d-none d-md-block" style="font-weight: 600;">{{ user.name }}</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end"
+                    style="border-radius: 10px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2); padding: 10px; min-width: 250px;">
+                    <li>
+                        <div class="dropdown-header" style="padding: 15px;">
+                            <h6 style="font-weight: 700; color: var(--primary-blue);">{{ user.name }}</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.85rem;">{{ user.email }}</p>
+                        </div>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('dashboard') }}"
+                            style="padding: 10px 15px; border-radius: 5px;">
+                            <i class="bi bi-speedometer2 me-2" style="color: var(--secondary-blue);"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('process_results') }}"
+                            style="padding: 10px 15px; border-radius: 5px;">
+                            <i class="bi bi-table me-2" style="color: var(--accent-teal);"></i>
+                            Back to Results
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('logout') }}"
+                            style="padding: 10px 15px; border-radius: 5px; color: var(--danger-red);">
+                            <i class="bi bi-box-arrow-right me-2"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Student Header -->
+    <div class="student-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+            <div>
+                <h2 class="fw-bold mb-1">{{ student.name | upper }}</h2>
+                <p class="mb-0 opacity-75">Enrollment No: {{ student.enrollment_no }}</p>
+            </div>
+            <div>
+                <a href="{{ url_for('process_results') }}" class="btn btn-back-top">
+                    <i class="bi bi-arrow-left"></i>
+                    <b>Back to Results</b>
+                </a>
+            </div>
+        </div>
+
+        <div class="student-basic-info">
+            <div class="info-card">
+                <h5>TOTAL MARKS</h5>
+                <div class="value">{{ total_marks }}</div>
+            </div>
+            <div class="info-card">
+                <h5>PERCENTAGE</h5>
+                <div class="value">{{ percentage }}%</div>
+            </div>
+            <div class="info-card">
+                <h5>GRADE</h5>
+                <div class="value">
+                    <span class="grade-badge grade-{{ grade }}">{{ grade }}</span>
+                </div>
+            </div>
+            <div class="info-card">
+                <h5>RANK</h5>
+                <div class="value">#{{ rank }}</div>
+            </div>
+            <div class="info-card">
+                <h5>STATUS</h5>
+                <div class="value">
+                    <span class="status-badge status-{{ status }}">{{ status }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="student-content">
+        <!-- Result Table -->
+        <div class="result-table">
+            <h3 class="mb-4"><i class="bi bi-table me-2"></i>Subject-wise Marks</h3>
+            <table class="marks-table">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Max Marks</th>
+                        <th>Obtained Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject in subjects %}
+                    <tr>
+                        <td><strong>{{ subject.split()[0].capitalize() }}</strong></td>
+                        <td>{{ max_marks }}</td>
+                        <td>{{ student.subjects[subject] }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="highlight-row">
+                        <td><strong>TOTAL</strong></td>
+                        <td><strong>{{ subjects|length * max_marks }}</strong></td>
+                        <td><strong>{{ total_marks }}</strong></td>
+
+                    </tr>
+                    <tr class="highlight-row">
+                        <td><strong>PERCENTAGE</strong></td>
+                        <td colspan="2"><strong>{{ percentage }}%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-section">
+            <h3><i class="bi bi-graph-up me-2"></i>Performance Analysis</h3>
+            <p class="text-muted mb-4">Comparison with class statistics (Max, Avg, Min)</p>
+
+            <div class="chart-container">
+                <canvas id="marksChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Email Form -->
+        <div class="email-form">
+            <h3><i class="bi bi-envelope me-2"></i>Share Result via Email</h3>
+            <p class="text-muted mb-4">Send this student's result as PDF to their email address</p>
+
+            <form action="{{ url_for('send_student_result') }}" method="POST">
+                <input type="hidden" name="enrollment_no" value="{{ student.enrollment_no }}">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Student Email Address</label>
+                        <input type="email" name="student_email" class="form-control"
+                            placeholder="Enter student's email address" required>
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-send">
+                                <i class="bi bi-send me-2"></i>Send Result PDF
+                            </button>
+                            <a href="{{ url_for('process_results') }}" class="btn btn-back">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Results
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% for category, message in messages %}
+<script>
+    alert("{{ message }}");
+</script>
+{% endfor %}
+{% endwith %}
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get data from Flask template
+        const subjects = JSON.parse('{{ subjects|tojson }}');
+        const studentMarks = JSON.parse('{{ student|tojson }}');
+        const classStats = JSON.parse('{{ class_stats|tojson }}');
+
+        // Prepare data for chart
+        const subjectNames = subjects;
+        const maxMarks = Array(subjects.length).fill("{{ max_marks }}");
+        const studentMarksData = subjects.map(subject => studentMarks.subjects[subject]);
+        const classMaxData = subjects.map(subject => classStats.subject_max[subject]);
+        const classMinData = subjects.map(subject => classStats.subject_min[subject]);
+        const classAvgData = subjects.map(subject => classStats.subject_avg[subject]);
+
+        // Create chart
+        const ctx = document.getElementById('marksChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: subjectNames,
+                datasets: [
+                    {
+                        label: 'Student Marks',
+                        data: studentMarksData,
+                        borderColor: '#3498DB',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Class Maximum',
+                        data: classMaxData,
+                        borderColor: '#27AE60',
+                        backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                    },
+                    {
+                        label: 'Class Minimum',
+                        data: classMinData,
+                        borderColor: '#E74C3C',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                    },
+                    {
+                        label: 'Class Average',
+                        data: classAvgData,
+                        borderColor: '#F39C12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                        borderWidth: 2,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: "{{ max_marks }}",
+                        title: {
+                            display: true,
+                            text: 'Marks'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return Math.round(value);
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Subjects'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'nearest'
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

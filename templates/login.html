@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login - ResultVista
+{% endblock %}
+
+{% block head %}
+<style>
+    :root {
+        --primary-blue: #2C3E50;
+        --secondary-blue: #3498DB;
+        --accent-teal: #1ABC9C;
+        --dark-gray: #6C757D;
+    }
+
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .register-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        max-width: 500px;
+        width: 100%;
+    }
+
+    .register-header {
+        background: var(--primary-blue);
+        color: white;
+        padding: 5px 30px 10px;
+        text-align: center;
+        position: relative;
+    }
+
+    .register-body {
+        padding: 40px 30px 6px 30px;
+    }
+
+    .logo-icon {
+        font-size: 5rem;
+        color: var(--accent-teal);
+        margin-bottom: 10px;
+    }
+
+    .logo-container {
+        margin-bottom: 15px;
+    }
+
+    .form-control-custom {
+        width: 100%;
+        height: 50px;
+        border: 2px solid #E3E6E8;
+        border-radius: 10px;
+        padding: 0 20px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-control-custom:focus {
+        border-color: var(--secondary-blue);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .btn-register {
+        height: 50px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        background: var(--secondary-blue);
+        border: none;
+        transition: all 0.3s;
+    }
+
+    .btn-register:hover:not(:disabled) {
+        background: #2980b9;
+        box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+
+    }
+
+    .btn-google {
+        height: 50px;
+        border-radius: 10px;
+        font-weight: 600;
+        background: white;
+        border: 2px solid #E3E6E8;
+        color: #444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .btn-google:hover {
+        background: #F8F9FA;
+        border-color: #D1D5DB;
+    }
+
+    .login-footer {
+        text-align: center;
+        border-top: 1px solid #E3E6E8;
+        padding-top: 20px;
+        color: var(--dark-gray);
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 576px) {
+        .register-body {
+            padding: 40px 20px 6px 20px;
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="register-container">
+    <!-- Header -->
+    <div class="register-header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <h1 class="h3 fw-bold mb-2">Welcome Back</h1>
+            <p class="opacity-75">Sign in to your account</p>
+        </div>
+    </div>
+
+    <!-- Body -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <div class="register-body">
+        <form id="registerForm" method="post">
+            <!-- Email -->
+            <div class="mb-4">
+                <label for="email" class="form-label fw-semibold">
+                    <i class="bi bi-envelope-fill"></i>
+                    Email Address
+                </label>
+                <input type="email" class="form-control-custom" id="email" name="mail" placeholder="abc@xyz.com"
+                    value="{{ email if email else '' }}" required autofocus>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4">
+                <label for="password" class="form-label fw-semibold">
+                    <i class="bi bi-lock-fill"></i>
+                    Password
+                </label>
+                <div class="input-group flex-nowrap">
+                    <input type="password" class="form-control-custom" id="password" name="password"
+                        placeholder="Enter your password" required>
+                    <button class="btn btn-outline-secondary " type="button" id="togglePassword">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" href="/login" class="btn btn-register text-light mb-4 w-100">
+                <i class="bi bi-box-arrow-in-right fs-5 me-1"></i>
+                Sign In
+            </button>
+
+            <!-- Divider -->
+            <div class="d-flex align-items-center justify-content-center mb-4">
+                <span class="text-secondary">OR</span>
+            </div>
+
+            <!-- Google Sign-In -->
+            <a type="button" href="/google-register" class="btn btn-google mb-4" id="googleRegisterBtn">
+                <img src="https://www.google.com/favicon.ico" alt="Google">
+                Sign in with Google
+            </a>
+
+            <!-- Footer -->
+            <div class="login-footer row">
+                <p>Don't have an account?
+                    <a href="/register" class="register-link">Create one now</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Toggle Password Visibility
+    function toggleVisibility(toggleBtnId, inputId) {
+        const toggleBtn = document.getElementById(toggleBtnId);
+        const input = document.getElementById(inputId);
+
+        toggleBtn.addEventListener('click', function () {
+            const type = input.type === 'password' ? 'text' : 'password';
+            input.type = type;
+            this.innerHTML = type === 'password'
+                ? '<i class="bi bi-eye"></i>'
+                : '<i class="bi bi-eye-slash"></i>';
+        });
+    }
+    toggleVisibility('togglePassword', 'password');
+</script>
+{% endblock %}
